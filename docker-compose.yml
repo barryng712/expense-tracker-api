@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: expense_tracker
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Khongnho123:))
+      MYSQL_ROOT_PASSWORD: Khongnho123:))
+    ports:
+      - "3306:3306"
+
+  web:
+    build: .
+    command: flask run --host=0.0.0.0
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      FLASK_APP: wsgi.py
+      FLASK_ENV: development
+      SECRET_KEY: your_secret_key
+      SQLALCHEMY_DATABASE_URI: mysql+pymysql://username:password@db/dbname
