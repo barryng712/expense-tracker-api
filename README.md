@@ -71,10 +71,7 @@ An API for an expense tracker application, allow users to create, read, update, 
     pytest
     ```
 
-## License
-
-This project is licensed under the MIT License.
-
+src: https://roadmap.sh/projects/expense-tracker-api
 
 
 
