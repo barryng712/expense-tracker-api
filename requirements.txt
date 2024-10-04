@@ -5,3 +5,4 @@ Flask-JWT-Extended
 marshmallow
 mysqlclient
 pytest
+PyMySQL
