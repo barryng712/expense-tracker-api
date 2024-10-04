@@ -4,6 +4,7 @@ from app import db
 from app.api.expenses.models import Expense
 from app.api.expenses.serializers import ExpenseSchema
 from marshmallow.exceptions import ValidationError
+from datetime import datetime, timedelta
 import logging
 
 expenses_bp =Blueprint('expenses', __name__)
@@ -56,6 +57,38 @@ def update_expense(expense_id):
 @jwt_required()
 def get_expenses():
     logging.info("Received request for /api/expenses")
-    expenses = Expense.query.all()
-    return jsonify(expenses), 200
+    filter_type = request.args.get('filter_type')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    current_date = datetime.now()
+
+    try:
+        if filter_type == 'past_week':
+            start_date = current_date - timedelta(days=7)
+            end_date = current_date
+        elif filter_type == 'past_month':
+            start_date = current_date - timedelta(days=30)
+            end_date = current_date
+        elif filter_type == 'last_3_months':
+            start_date = current_date - timedelta(days=90)
+            end_date = current_date
+        elif filter_type == 'custom_range':
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        else:
+            start_date = None
+            end_date = None
+
+        if start_date and end_date:
+            expenses = Expense.query.filter(Expense.date.between(start_date, end_date)).all()
+        elif start_date:
+            expenses = Expense.query.filter(Expense.date >= start_date).all()
+        else:
+            expenses = Expense.query.all()
+
+        return jsonify(expenses_schema.dump(expenses)), 200
+
+    except ValueError as e:
+        logging.error(f"Error parsing dates: {e}")
+        return jsonify({"error": "Invalid date format. Please use YYYY-MM-DD."}), 400
 
